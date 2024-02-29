@@ -1,2 +1,6 @@
 # Database-Flow-Go
-Init done
+Git status
+
+Git Add
+Git Commit
+Git Push
