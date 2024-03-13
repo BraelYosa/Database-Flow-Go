@@ -18,6 +18,8 @@ func main() {
 
 	connection.DB = data
 
+	routes.Admin(e)
+
 	routes.User(e)
 
 	e.Logger.Fatal(e.Start(":1000"))

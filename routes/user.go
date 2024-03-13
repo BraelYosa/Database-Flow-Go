@@ -2,18 +2,27 @@ package routes
 
 import (
 	"app/controllers"
+	"app/helpers/connection"
 
 	"github.com/labstack/echo/v4"
 )
 
+func Admin(e *echo.Echo) {
+
+	e.POST("Signup", controllers.Signup)
+
+	e.POST("Login", controllers.Login)
+}
+
 func User(e *echo.Echo) {
 
-	e.POST("User/Create", controllers.CreateUser)
+	userGroup := e.Group("/User", connection.CheckToken)
 
-	e.POST("User/Search", controllers.SearchUsers)
+	userGroup.POST("/Create", controllers.CreateUser)
 
-	e.POST("User/Update", controllers.UpdateUser)
+	userGroup.POST("/Search", controllers.SearchUsers)
 
-	e.POST("User/View", controllers.ViewUser)
+	userGroup.POST("/Update", controllers.UpdateUser)
 
+	userGroup.POST("/View", controllers.ViewUser)
 }
