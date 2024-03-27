@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"app/helpers"
-	"app/helpers/connection"
+	"app/helpers/connection/postgres"
 	"app/model"
 	"net/http"
 	"time"
@@ -15,7 +15,7 @@ func Signup(c echo.Context) error {
 	var admin model.Admin
 
 	if err := c.Bind(&admin); err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error Bind admin")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_Bind_admin")
 	}
 
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(admin.AdminPass), bcrypt.DefaultCost)
@@ -25,11 +25,11 @@ func Signup(c echo.Context) error {
 
 	admin.AdminPass = string(hashedPass)
 
-	if err := connection.CreateAdmin(admin); err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error creating admin")
+	if err := postgres.CreateAdmin(admin); err != nil {
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_creating_admin")
 	}
 
-	token, err := connection.GenerateJWT(admin, 24)
+	token, err := postgres.GenerateJWT(admin, 24)
 	if err != nil {
 		return err
 	}
@@ -48,16 +48,16 @@ func Login(c echo.Context) error {
 		return err
 	}
 
-	admin, err := connection.GetAdminByEmail(adminLogin.AdminEmail)
+	admin, err := postgres.GetAdminByEmail(adminLogin.AdminEmail)
 	if err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error get admin Email")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_get_admin_Email")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(admin.AdminPass), []byte(adminLogin.AdminPass)); err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error compare")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_compare")
 	}
 
-	token, err := connection.GenerateJWT(*admin, 24*time.Hour)
+	token, err := postgres.GenerateJWT(*admin, 24*time.Hour)
 	if err != nil {
 		return err
 	}
@@ -65,7 +65,7 @@ func Login(c echo.Context) error {
 	expTime := time.Now().Add(24 * time.Hour)
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"token":  token,
-		"Exp at": expTime.Format(time.RFC3339),
+		"Exp_at": expTime.Format(time.RFC3339),
 	})
 
 }

@@ -42,7 +42,7 @@ func ErrorResponse(c echo.Context, errorType int, data any, errorMessage ...stri
 	}
 
 	errorResponse = map[string]any{
-		"Error Type": errorType,
+		"Error_Type": errorType,
 		"Message":    errorResponseMessage,
 		"Data":       data,
 	}
@@ -54,7 +54,7 @@ func ErrorResponse(c echo.Context, errorType int, data any, errorMessage ...stri
 func SuccessResponse(c echo.Context, data map[string]any, status int) error {
 
 	successRes := map[string]any{
-		"Final Response": "Success",
+		"Final_Response": "Success",
 		"Data":           data,
 	}
 

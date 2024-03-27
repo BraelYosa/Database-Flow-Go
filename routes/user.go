@@ -12,6 +12,7 @@ func Admin(e *echo.Echo) {
 	e.POST("Signup", controllers.Signup)
 
 	e.POST("Login", controllers.Login)
+
 }
 
 func User(e *echo.Echo) {

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"app/helpers"
-	"app/helpers/connection"
+	"app/helpers/connection/postgres"
 	"app/model"
 	"net/http"
 	"strings"
@@ -17,11 +17,11 @@ func CreateUser(c echo.Context) error {
 
 	var dataResponse []model.Users
 	if err := c.Bind(&dataResponse); err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error Bind Data")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_Bind_Data")
 	}
 
 	for _, user := range dataResponse {
-		if err := connection.CreateUser(user); err != nil {
+		if err := postgres.CreateUser(user); err != nil {
 			if strings.Contains(err.Error(), "User with the same name already exits") {
 				return helpers.ErrorResponse(c, http.StatusInternalServerError, "User with the same name already exits")
 			}
@@ -30,7 +30,7 @@ func CreateUser(c echo.Context) error {
 	}
 
 	newResponse["Status"] = "Created"
-	newResponse["Status Type"] = http.StatusAccepted
+	newResponse["Status_Type"] = http.StatusAccepted
 	newResponse["Created"] = dataResponse
 
 	return helpers.SuccessResponse(c, newResponse, http.StatusAccepted)
@@ -43,33 +43,32 @@ func SearchUsers(c echo.Context) error {
 	// Parse the request body to get the search parameters
 	var searchRequest model.SearchRequest
 	if err := c.Bind(&searchRequest); err != nil {
-		return helpers.ErrorResponse(c, http.StatusBadRequest, "Invalid request body")
+		return helpers.ErrorResponse(c, http.StatusBadRequest, "Invalid_request_body")
 	}
 
-	users, err := connection.SearchUsers(searchRequest)
+	users, err := postgres.SearchUsers(searchRequest)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			newResponse["Status"] = "No records found"
-			newResponse["Status Type"] = http.StatusNotFound
+			newResponse["Status"] = "No_records_found"
+			newResponse["Status_Type"] = http.StatusNotFound
 			return helpers.ErrorResponse(c, http.StatusNotFound, newResponse)
 		}
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error searching users")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_searching_users")
 	}
 
 	newResponse["Status"] = "Success"
-	newResponse["Status Type"] = http.StatusOK
+	newResponse["Status_Type"] = http.StatusOK
 	newResponse["Found"] = users
 
 	if strings.ToUpper(searchRequest.Output) == "CSV" {
 		return c.JSONPretty(200, map[string]any{
 			"code":    200,
 			"message": "",
-			"data":    c.File("./file/CSV/output.CSV"),
+			"data":    c.File("./file/CSV/usersOutput.CSV"),
 		}, " ")
 	}
 	return helpers.SuccessResponse(c, newResponse, http.StatusOK)
 
-	// Response to struct
 }
 
 // Took me 2 days
@@ -79,16 +78,16 @@ func UpdateUser(c echo.Context) error {
 
 	var updateReq model.UpdateReq
 	if err := c.Bind(&updateReq); err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Invalid req body")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Invalid_req_body")
 	}
 
-	err := connection.UpdateUser(updateReq.UserID, &updateReq.UpdateUser)
+	err := postgres.UpdateUser(updateReq.UserID, &updateReq.UpdateUser)
 	if err != nil {
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error updating user")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_updating_user")
 	}
 
 	newResponse["Status"] = "Updated"
-	newResponse["Status Type"] = http.StatusOK
+	newResponse["Status_Type"] = http.StatusOK
 	newResponse["Created"] = updateReq.UpdateUser
 
 	return helpers.SuccessResponse(c, newResponse, http.StatusOK)
@@ -101,20 +100,20 @@ func ViewUser(c echo.Context) error {
 
 	userID := c.QueryParam("userID")
 	if userID == "" {
-		return helpers.ErrorResponse(c, http.StatusBadRequest, "User ID is required")
+		return helpers.ErrorResponse(c, http.StatusBadRequest, "User_ID_is_required")
 	}
 
 	// Retrieve user by ID
-	user, err := connection.ViewUser(userID)
+	user, err := postgres.ViewUser(userID)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return helpers.ErrorResponse(c, http.StatusNotFound, "User not found")
+			return helpers.ErrorResponse(c, http.StatusNotFound, "User_not_found")
 		}
-		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error retrieving user")
+		return helpers.ErrorResponse(c, http.StatusInternalServerError, "Error_retrieving_user")
 	}
 
 	newResponse["Status"] = "Success"
-	newResponse["Status Type"] = http.StatusOK
+	newResponse["Status_Type"] = http.StatusOK
 	newResponse["Found"] = user
 
 	return helpers.SuccessResponse(c, newResponse, http.StatusOK)

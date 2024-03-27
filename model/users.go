@@ -1,15 +1,20 @@
 package model
 
 import (
+	"time"
+
 	"gorm.io/gorm"
 )
 
 type Users struct {
-	gorm.Model
-	Name string `gorm:"column:name" json:"name"`
-	Age  int    `gorm:"column:age" json:"age"`
+	User_ID uint   `gorm:"primarykey"`
+	Name    string `gorm:"column:name" json:"name"`
+	Age     int    `gorm:"column:age" json:"age"`
 	Location
-	Hobby string `gorm:"column:hobby" json:"hobby"`
+	Hobby     string `gorm:"column:hobby" json:"hobby"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 // SearchRequest represents the search parameters / pagination
@@ -24,8 +29,10 @@ type SearchRequest struct {
 }
 
 type UpdateReq struct {
-	UserID     string `json:"user_id"`
-	UpdateUser Users  `json:"updated_user"`
+	UserID        string   `json:"user_id"`
+	ProductID     string   `json:"product_id"`
+	UpdateUser    Users    `json:"updated_user"`
+	UpdateProduct Products `json:"update_product"`
 }
 
 type ViewRequest struct {
@@ -38,8 +45,21 @@ type Location struct {
 }
 
 type Admin struct {
-	gorm.Model
+	Admin_id     uint   `gorm:"primaryKey"`
 	AdminEmail   string `gorm:"column:admin_mail" json:"admin_mail"`
 	AdminSurname string `gorm:"column:admin_name" json:"admin_name"`
 	AdminPass    string `gorm:"column:admin_pass" json:"admin_pass"` //hash password
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
+}
+
+type Products struct {
+	ProductID    uint64 `gorm:"primaryKey" column:"product_id"`
+	AdminID      uint   `gorm:"column:admin_id" json:"admin_id"`
+	ProductName  string `gorm:"column:product_name" json:"product_name"`
+	ProductPrice int    `gorm:"column:product_price" json:"product_price"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
 }
